@@ -1,0 +1,24 @@
+# prodifolio · Hikari (@hikarilucky79)
+
+> Portfólio pessoal dinâmico de Hikari (@hikarilucky79), construído com backend REST em Go 1.22+ conectado ao Supabase PostgreSQL e interface em Flutter Web.
+
+## When to use
+
+- Consultar os repositórios públicos, linguagens predominantes, estrelas e commits recentes de `@hikarilucky79` diretamente pela API REST em Go sem precisar autenticar na API do GitHub.
+- Obter detalhes individuais de um projeto (`GET /projects/{name}`) ou métricas agregadas de linguagens e atividade dos últimos 14 dias (`GET /stats`).
+- Enviar mensagens de contato estruturadas (`POST /contact`) para Hikari via API com validação de entrada e persistência em banco normalizado (3NF).
+
+## Navegação e recursos
+
+- [Portfólio web](https://dev-hikari.vercel.app/): Aplicação principal com apresentação, projetos públicos do GitHub, estatísticas de linguagens e atividade de commits, trajetória e formulário de contato.
+- [Currículo em PDF](https://dev-hikari.vercel.app/curriculo.pdf): Currículo resumido em PDF (1 página).
+- [Perfil GitHub](https://github.com/hikarilucky79): Repositórios públicos sincronizados automaticamente pelo backend.
+- [LinkedIn](https://www.linkedin.com/in/kau%C3%A3-oliveira-43b07b268/): Perfil profissional de Kauã Oliveira.
+- [Catálogo ARD (ard.json)](https://dev-hikari.vercel.app/.well-known/ard.json): Descritor no padrão Agentic Resource Discovery.
+- [Sitemap](https://dev-hikari.vercel.app/sitemap.xml): Mapa XML das URLs indexáveis.
+
+## API pública (Go REST)
+
+- [Projetos públicos](https://prodifolio-api.vercel.app/projects): Lista de repositórios públicos de `@hikarilucky79`, linguagens, estrelas e metadados do perfil.
+- [Estatísticas de código](https://prodifolio-api.vercel.app/stats): Distribuição de linguagens e histórico recente de commits.
+- [Health check](https://prodifolio-api.vercel.app/health): Estado da API e conectividade com o banco.

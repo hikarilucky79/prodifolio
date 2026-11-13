@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0D0D0E">
+  <meta name="description" content="prodifolio · Portfólio pessoal dinâmico de Hikari (@hikarilucky79) sincronizado com GitHub, Go e Supabase.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="prodifolio · Hikari (@hikarilucky79)">
+  <meta property="og:description" content="Portfólio pessoal dinâmico de Hikari (@hikarilucky79) com backend em Go 1.22+, Supabase 3NF e interface em Flutter Web.">
+  <meta property="og:url" content="https://dev-hikari.vercel.app/">
+  <meta property="og:image" content="https://dev-hikari.vercel.app/icons/Icon-512.png">
+
+  <link rel="canonical" href="https://dev-hikari.vercel.app/">
+  <link rel="preconnect" href="https://prodifolio-api.vercel.app" crossorigin>
+  <link rel="preconnect" href="https://avatars.githubusercontent.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="ard" href="/.well-known/ard.json">
+  <link rel="ai-catalog" href="/.well-known/ai-catalog.json">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="prodifolio">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="shortcut icon" href="favicon.ico">
+
+  <title>prodifolio · hikarilucky79</title>
+  <link rel="manifest" href="manifest.json">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Hikari",
+    "alternateName": "hikarilucky79",
+    "url": "https://dev-hikari.vercel.app/",
+    "image": "https://avatars.githubusercontent.com/u/285314334?v=4",
+    "description": "Desenvolvedor focado em backend Go 1.22+, modelagem de dados normalizada em Supabase PostgreSQL e interfaces autorais em Flutter.",
+    "sameAs": [
+      "https://github.com/hikarilucky79",
+      "https://www.linkedin.com/in/kau%C3%A3-oliveira-43b07b268/"
+    ],
+    "knowsAbout": ["Go", "Flutter", "Dart", "PostgreSQL", "REST APIs"]
+  }
+  </script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background-color: #0D0D0E;
+      color: #F5F3EF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    ::selection {
+      background: #C86D51;
+      color: #F5F3EF;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0D0D0E;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272A;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C86D51;
+    }
+    #folio-shell {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(24px, 5vw, 56px);
+      background-color: #0D0D0E;
+      color: #F5F3EF;
+    }
+    .folio-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #27272A;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #A1A1AA;
+    }
+    .folio-hero {
+      max-width: 720px;
+      margin: auto 0;
+    }
+    .folio-eyebrow {
+      margin: 0 0 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: #E0896C;
+    }
+    .folio-title {
+      margin: 0 0 20px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(52px, 8vw, 92px);
+      font-weight: 600;
+      line-height: 0.94;
+      letter-spacing: -0.03em;
+      color: #F5F3EF;
+    }
+    .folio-lead {
+      margin: 0 0 14px;
+      max-width: 560px;
+      font-size: 16px;
+      line-height: 1.55;
+      color: #A1A1AA;
+    }
+    .folio-summary {
+      margin: 0;
+      max-width: 560px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #A1A1AA;
+    }
+    .folio-footer {
+      padding-top: 16px;
+      border-top: 1px solid #27272A;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      color: #A1A1AA;
+    }
+  </style>
+</head>
+<body>
+  <section id="folio-shell" aria-label="Apresentação de Hikari">
+    <div class="folio-topbar">
+      <span>PRODIFOLIO · FOLIO TÉCNICO</span>
+      <span>@HIKARILUCKY79</span>
+    </div>
+    <div class="folio-hero">
+      <p class="folio-eyebrow">@hikarilucky79</p>
+      <h1 class="folio-title">Hikari</h1>
+      <p class="folio-lead">Apaixonado por código, UI elegante e projetos criativos — portfólio pessoal dinâmico sincronizado continuamente com o GitHub.</p>
+      <p class="folio-summary">Arquitetura composta por API REST em Go 1.22+ com cache em memória, persistência normalizada até a 3ª Forma Normal em PostgreSQL no Supabase, catálogo interativo de repositórios em JavaScript, Go, Python, C, Dart e TypeScript, gráficos customizados de estatísticas e formulário de contato validado em produção.</p>
+    </div>
+    <div class="folio-footer">Carregando interface interativa…</div>
+  </section>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
