@@ -1,6 +1,7 @@
 class AppConfig {
   const AppConfig._();
 
+  static const String ownerDisplayName = 'Kauã Oliveira';
   static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
   static const String resumeUrl = String.fromEnvironment('RESUME_URL');
   static const String linkedInUrl =

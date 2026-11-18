@@ -1,6 +1,6 @@
 # prodifolio
 
-Portfólio pessoal dinâmico de **hikarilucky79**, atualizado automaticamente a partir dos repositórios públicos do GitHub, com backend em **Go 1.22+**, banco **Supabase (PostgreSQL em 3FN)** e app **Flutter Material 3** (Web + Mobile).
+Portfólio pessoal de **Kauã Oliveira** (`@hikarilucky79`), atualizado automaticamente a partir dos repositórios públicos do GitHub, com backend em **Go 1.22+**, banco **Supabase (PostgreSQL em 3FN)** e app **Flutter Material 3** (Web + Mobile).
 
 - **Ao vivo:** [dev-hikari.vercel.app](https://dev-hikari.vercel.app)
 - **Currículo (PDF):** [dev-hikari.vercel.app/curriculo.pdf](https://dev-hikari.vercel.app/curriculo.pdf)

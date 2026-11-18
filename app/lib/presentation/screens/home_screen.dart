@@ -43,8 +43,7 @@ class HomeScreen extends ConsumerWidget {
             builder: (context, constraints) {
               final isWide = constraints.maxWidth >= 860;
               final splitMinHeight = math.max(0.0, constraints.maxHeight - 56);
-              final displayName =
-                  owner.name.isEmpty ? owner.username : owner.name;
+              const displayName = AppConfig.ownerDisplayName;
 
               final leadSection = Padding(
                 padding: EdgeInsets.all(isWide ? 44 : 20),
@@ -58,8 +57,8 @@ class HomeScreen extends ConsumerWidget {
                         Text(
                           displayName,
                           style: context.displayStyle(
-                            size: isWide ? 92 : 54,
-                            height: 0.94,
+                            size: isWide ? 72 : 44,
+                            height: 0.98,
                             letterSpacing: -0.03,
                           ),
                         ),
@@ -146,33 +145,21 @@ class HomeScreen extends ConsumerWidget {
                           child: OutlinedButton.icon(
                             onPressed: () =>
                                 openExternalUrl(context, AppConfig.linkedInUrl),
-                            icon: const Icon(Icons.work_outline, size: 15),
+                            icon: const Icon(Icons.north_east, size: 15),
                             label: const Text('LinkedIn'),
                           ),
                         ),
-                        if (owner.blogUrl.isNotEmpty)
-                          Semantics(
-                            button: true,
-                            label: 'Abrir site pessoal',
-                            child: OutlinedButton.icon(
-                              onPressed: () =>
-                                  openExternalUrl(context, owner.blogUrl),
-                              icon: const Icon(Icons.language, size: 15),
-                              label: const Text('Website'),
-                            ),
-                          )
-                        else
-                          Semantics(
-                            button: true,
-                            label: 'Ir para formulário de contato',
-                            child: TextButton.icon(
-                              onPressed: () {
-                                ref.read(selectedTabProvider.notifier).state = 4;
-                              },
-                              icon: const Icon(Icons.mail_outline, size: 15),
-                              label: const Text('Contato'),
-                            ),
+                        Semantics(
+                          button: true,
+                          label: 'Ir para formulário de contato',
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              ref.read(selectedTabProvider.notifier).state = 4;
+                            },
+                            icon: const Icon(Icons.mail_outline, size: 15),
+                            label: const Text('Contato'),
                           ),
+                        ),
                       ],
                     ),
                   ],
@@ -283,15 +270,15 @@ class HomeScreen extends ConsumerWidget {
                   alignment: WrapAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${feed.projects.length} REPOSITÓRIOS SINCRONIZADOS',
+                      '${feed.projects.length} ${feed.projects.length == 1 ? 'REPOSITÓRIO SINCRONIZADO' : 'REPOSITÓRIOS SINCRONIZADOS'}',
                       style: context.monoStyle(size: 11, color: folio.ink),
                     ),
                     Text(
-                      '$totalStars ESTRELAS NO GITHUB',
+                      '$totalStars ${totalStars == 1 ? 'ESTRELA NO GITHUB' : 'ESTRELAS NO GITHUB'}',
                       style: context.monoStyle(size: 11, color: folio.inkMuted),
                     ),
                     Text(
-                      '${topLanguages.length} LINGUAGENS PRINCIPAIS',
+                      '${topLanguages.length} ${topLanguages.length == 1 ? 'LINGUAGEM PRINCIPAL' : 'LINGUAGENS PRINCIPAIS'}',
                       style: context.monoStyle(size: 11, color: folio.inkMuted),
                     ),
                   ],
@@ -361,7 +348,7 @@ class HomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Currículo · ${owner.name.isEmpty ? owner.username : owner.name}',
+                'Currículo · ${AppConfig.ownerDisplayName}',
                 style: context.displayStyle(
                   size: 28,
                   color: folio.contrastInk,
@@ -436,7 +423,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     onPressed: () =>
                         openExternalUrl(context, AppConfig.linkedInUrl),
-                    icon: const Icon(Icons.work_outline, size: 15),
+                    icon: const Icon(Icons.north_east, size: 15),
                     label: const Text('LinkedIn'),
                   ),
                 ],
@@ -465,7 +452,7 @@ class _CatalogPreviewRow extends StatelessWidget {
     final folio = context.folio;
     final ordinal = 'N° ${index.toString().padLeft(2, '0')}';
     final langLabel =
-        project.languages.isEmpty ? 'Código' : project.languages.first;
+        project.languages.isEmpty ? 'Código' : project.languages.take(2).join(' · ');
     final metaLabel = project.stars > 0
         ? '$langLabel · ${project.stars} ${project.stars == 1 ? 'estrela' : 'estrelas'}'
         : langLabel;
@@ -526,7 +513,7 @@ class _PortraitFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     final folio = context.folio;
     final initial = displayName.trim().isEmpty
-        ? 'H'
+        ? 'K'
         : displayName.trim().substring(0, 1).toUpperCase();
 
     Widget fallbackBox() => Container(

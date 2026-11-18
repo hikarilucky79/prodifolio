@@ -81,28 +81,37 @@ final aboutTimelineProvider = FutureProvider<List<TimelineMilestone>>((ref) asyn
     TimelineMilestone(
       period: '2026 · Atual',
       title: 'Prodifolio & Engenharia Full-Stack',
-      subtitle: '${feed.owner.name} (@${feed.owner.username})',
+      subtitle: '${AppConfig.ownerDisplayName} (@${feed.owner.username})',
       highlights: [
-        '$repoCount repositórios públicos sincronizados direto do GitHub',
+        '$repoCount ${repoCount == 1 ? 'repositório público sincronizado' : 'repositórios públicos sincronizados'} direto do GitHub',
         'Stack ativa: $topStack',
       ],
     ),
     const TimelineMilestone(
-      period: '2026 · Backend & Dados',
-      title: 'APIs resilientes em Go + PostgreSQL/Supabase',
+      period: '2025 – 2026 · Backend & APIs',
+      title: 'APIs resilientes em Go, Python & SQL',
       subtitle: 'Arquitetura limpa e modelagem relacional',
       highlights: [
-        'Cache TTL em memória, rate limiting por IP e logs estruturados',
-        'Banco normalizado até 3FN com transações atômicas e RLS',
+        'Cache TTL em memória, rate limiting por IP e logs estruturados em Go',
+        'Banco PostgreSQL/Supabase em 3FN com RLS e APIs FastAPI + MySQL 8',
       ],
     ),
     const TimelineMilestone(
-      period: '2026 · Interfaces',
-      title: 'Apps multiplataforma com Flutter Material 3',
-      subtitle: 'UI elegante, responsiva e acessível',
+      period: '2025 – 2026 · Multiplataforma',
+      title: 'Apps multiplataforma em Flutter, React Native & Rust',
+      subtitle: 'UI responsiva, acessibilidade e sistemas desktop',
       highlights: [
-        'Layouts adaptativos para celular, tablet e desktop',
-        'Visualizações autorais desenhadas em CustomPainter',
+        'Flutter Material 3 (Web/Mobile) com CustomPainter e Riverpod',
+        'Daemon desktop em Rust com IPC via Unix Domain Sockets no Linux (Keyra)',
+      ],
+    ),
+    const TimelineMilestone(
+      period: 'fev. 2024 – dez. 2026',
+      title: 'Formação Técnica · CEEP Curitiba',
+      subtitle: 'Técnico em Desenvolvimento de Sistemas · Curitiba, PR',
+      highlights: [
+        'Base sólida em lógica, Programação Orientada a Objetos (C#) e bancos relacionais',
+        'Projeto Integrador: plataforma nutricional KaorCount (Keenko) publicada em produção',
       ],
     ),
   ];

@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -98,8 +99,9 @@ type ContactRequest struct {
 }
 
 type cachedProjects struct {
-	owner github.User
-	repos []github.Repo
+	owner     github.User
+	repos     []github.Repo
+	langBytes map[int64]map[string]int64
 }
 
 type Service struct {
@@ -156,10 +158,7 @@ func (s *Service) ListProjects(ctx context.Context) (ProjectsResponse, error) {
 
 	items := make([]ProjectSummary, 0, len(data.repos))
 	for _, repo := range data.repos {
-		langs := []string{}
-		if repo.Language != "" {
-			langs = []string{repo.Language}
-		}
+		langs := significantLanguages(data.langBytes[repo.ID], repo.Language)
 		items = append(items, ProjectSummary{
 			Name:        repo.Name,
 			Description: repo.Description,
@@ -334,20 +333,20 @@ func (s *Service) GetStats(ctx context.Context) (StatsResponse, error) {
 
 	totalStars := 0
 	langCounts := make(map[string]int)
-	totalTaggedRepos := 0
+	totalLangTags := 0
 	for _, repo := range projectsData.repos {
 		totalStars += repo.StargazersCount
-		if repo.Language != "" {
-			langCounts[repo.Language]++
-			totalTaggedRepos++
+		for _, lang := range significantLanguages(projectsData.langBytes[repo.ID], repo.Language) {
+			langCounts[lang]++
+			totalLangTags++
 		}
 	}
 
 	languages := make([]LanguageStat, 0, len(langCounts))
 	for name, count := range langCounts {
 		pct := 0.0
-		if totalTaggedRepos > 0 {
-			pct = math.Round((float64(count)/float64(totalTaggedRepos))*1000) / 10
+		if totalLangTags > 0 {
+			pct = math.Round((float64(count)/float64(totalLangTags))*1000) / 10
 		}
 		languages = append(languages, LanguageStat{
 			Name:       name,
@@ -441,7 +440,7 @@ func (s *Service) loadProjects(ctx context.Context) (cachedProjects, bool, error
 		fetchCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
 		defer cancel()
 
-		repos, err := s.gh.ListRepos(fetchCtx, s.username)
+		rawRepos, err := s.gh.ListRepos(fetchCtx, s.username)
 		if err != nil {
 			if stale, ok := s.projectsCache.GetStale("projects"); ok {
 				s.logger.Warn("serving stale projects after github error", "error", err)
@@ -450,20 +449,57 @@ func (s *Service) loadProjects(ctx context.Context) (cachedProjects, bool, error
 			return projectsResult{}, err
 		}
 
+		repos := make([]github.Repo, 0, len(rawRepos))
+		for _, r := range rawRepos {
+			if strings.EqualFold(strings.TrimSpace(r.Name), strings.TrimSpace(s.username)) {
+				continue
+			}
+			repos = append(repos, r)
+		}
+
+		langBytes := make(map[int64]map[string]int64, len(repos))
+		maxLangRepos := len(repos)
+		if maxLangRepos > 12 {
+			maxLangRepos = 12
+		}
+		var (
+			wg sync.WaitGroup
+			mu sync.Mutex
+		)
+		for _, repo := range repos[:maxLangRepos] {
+			r := repo
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				lb, langErr := s.gh.GetRepoLanguages(fetchCtx, s.username, r.Name)
+				if langErr != nil {
+					s.logger.Warn("failed to load repo languages during list", "repo", r.Name, "error", langErr)
+					return
+				}
+				if len(lb) > 0 && r.ID > 0 {
+					mu.Lock()
+					langBytes[r.ID] = lb
+					mu.Unlock()
+				}
+			}()
+		}
+		wg.Wait()
+
 		user, err := s.gh.GetUser(fetchCtx, s.username)
 		if err != nil {
 			s.logger.Warn("failed to load github user profile", "error", err)
 			user = github.User{Login: s.username, HTMLURL: "https://github.com/" + s.username}
 		}
 
-		data := cachedProjects{owner: user, repos: repos}
+		data := cachedProjects{owner: user, repos: repos, langBytes: langBytes}
 		s.projectsCache.Set("projects", data)
 
 		if s.store != nil {
 			syncCtx, syncCancel := context.WithTimeout(fetchCtx, 3*time.Second)
 			err := s.store.SyncPortfolio(syncCtx, store.PortfolioSnapshot{
-				Owner: user,
-				Repos: repos,
+				Owner:     user,
+				Repos:     repos,
+				Languages: langBytes,
 			})
 			syncCancel()
 			if err != nil {
@@ -529,6 +565,44 @@ func (s *Service) loadEvents(ctx context.Context) ([]github.PublicEvent, bool, e
 	}
 	res := val.(eventsResult)
 	return res.events, res.cached, nil
+}
+
+func significantLanguages(langBytes map[string]int64, primary string) []string {
+	if len(langBytes) == 0 {
+		if primary == "" {
+			return []string{}
+		}
+		return []string{primary}
+	}
+	type pair struct {
+		name  string
+		bytes int64
+	}
+	var total int64
+	pairs := make([]pair, 0, len(langBytes))
+	for k, v := range langBytes {
+		if v <= 0 {
+			continue
+		}
+		total += v
+		pairs = append(pairs, pair{name: k, bytes: v})
+	}
+	sort.Slice(pairs, func(i, j int) bool {
+		if pairs[i].bytes != pairs[j].bytes {
+			return pairs[i].bytes > pairs[j].bytes
+		}
+		return pairs[i].name < pairs[j].name
+	})
+	out := make([]string, 0, len(pairs))
+	for _, p := range pairs {
+		if total > 0 && p.bytes*100 >= total*15 {
+			out = append(out, p.name)
+		}
+	}
+	if len(out) == 0 && primary != "" {
+		return []string{primary}
+	}
+	return out
 }
 
 func sortLanguagesByBytes(langBytes map[string]int64, primary string) []string {

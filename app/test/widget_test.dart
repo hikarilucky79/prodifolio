@@ -186,6 +186,7 @@ void main() {
 
     expect(find.text('Linguagens mais usadas'), findsOneWidget);
     expect(find.text('Atividade recente de commits'), findsOneWidget);
+    expect(find.text('1 repo · 50.0%'), findsNWidgets(2));
     expect(find.byType(CustomPaint), findsAtLeastNWidgets(2));
 
     await tester.pumpWidget(
@@ -213,14 +214,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Hikari'), findsOneWidget);
+    expect(find.text('Kauã Oliveira'), findsOneWidget);
     expect(find.text('@hikarilucky79'), findsOneWidget);
     expect(find.text('Currículo'), findsOneWidget);
     expect(find.text('LinkedIn'), findsOneWidget);
+    expect(find.text('Contato'), findsOneWidget);
+    expect(find.text('Website'), findsNothing);
 
     await tester.tap(find.text('Currículo'));
     await tester.pumpAndSettle();
-    expect(find.text('Currículo · Hikari'), findsOneWidget);
+    expect(find.text('Currículo · Kauã Oliveira'), findsOneWidget);
     expect(find.text('Baixar PDF'), findsOneWidget);
   });
 
@@ -237,6 +240,7 @@ void main() {
 
     expect(find.text('Sobre & Trajetória'), findsOneWidget);
     expect(find.text('Prodifolio & Engenharia Full-Stack'), findsOneWidget);
+    expect(find.text('Formação Técnica · CEEP Curitiba'), findsOneWidget);
   });
 
   testWidgets('ProjectsScreen opens technical lightbox and sets briefing context', (

@@ -16,7 +16,7 @@ class ProdifolioApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
-      title: 'prodifolio · hikarilucky79',
+      title: 'Kauã Oliveira · Portfólio',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       theme: AppTheme.light(),

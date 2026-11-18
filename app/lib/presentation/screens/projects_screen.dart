@@ -62,7 +62,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
                       ),
                       if (count != null)
                         Text(
-                          '$count ITENS',
+                          '$count ${count == 1 ? 'ITEM' : 'ITENS'}',
                           style: context.monoStyle(size: 11, color: folio.accent),
                         ),
                     ],

@@ -1,12 +1,12 @@
-# prodifolio · Hikari (@hikarilucky79)
+# prodifolio · Kauã Oliveira (@hikarilucky79)
 
-> Portfólio pessoal dinâmico de Hikari (@hikarilucky79), construído com backend REST em Go 1.22+ conectado ao Supabase PostgreSQL e interface em Flutter Web.
+> Portfólio pessoal de Kauã Oliveira (@hikarilucky79), construído com backend REST em Go 1.22+ conectado ao Supabase PostgreSQL e interface em Flutter Web.
 
 ## When to use
 
 - Consultar os repositórios públicos, linguagens predominantes, estrelas e commits recentes de `@hikarilucky79` diretamente pela API REST em Go sem precisar autenticar na API do GitHub.
 - Obter detalhes individuais de um projeto (`GET /projects/{name}`) ou métricas agregadas de linguagens e atividade dos últimos 14 dias (`GET /stats`).
-- Enviar mensagens de contato estruturadas (`POST /contact`) para Hikari via API com validação de entrada e persistência em banco normalizado (3NF).
+- Enviar mensagens de contato estruturadas (`POST /contact`) para Kauã Oliveira via API com validação de entrada e persistência em banco normalizado (3FN).
 
 ## Navegação e recursos
 

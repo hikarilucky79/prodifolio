@@ -92,7 +92,7 @@ class ResponsiveScaffold extends ConsumerWidget {
 
         final statusLabel = feedAsync.when(
           data: (feed) =>
-              '${feed.projects.length} REPOS · @${feed.owner.username.toUpperCase()}',
+              '${feed.projects.length} ${feed.projects.length == 1 ? 'REPO' : 'REPOS'} · @${feed.owner.username.toUpperCase()}',
           loading: () => 'SINCRONIZANDO GITHUB...',
           error: (_, _) => 'API INDISPONÍVEL',
         );
@@ -263,7 +263,7 @@ class _EditorialRail extends StatelessWidget {
               children: [
                 Text(
                   repoCount != null
-                      ? '$repoCount repositórios públicos'
+                      ? '$repoCount ${repoCount == 1 ? 'repositório público' : 'repositórios públicos'}'
                       : 'Carregando repositórios',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),

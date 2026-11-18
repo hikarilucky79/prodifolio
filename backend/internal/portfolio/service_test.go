@@ -229,3 +229,46 @@ func TestUnknownProjectAvoidsUpstreamAndSingleflightCoalesces(t *testing.T) {
 		t.Fatalf("expected 1 coalesced ListRepos call, got %d", calls)
 	}
 }
+
+func TestServiceFiltersProfileRepoAndEnrichesSignificantLanguages(t *testing.T) {
+	now := time.Date(2026, 11, 18, 12, 0, 0, 0, time.UTC)
+	gh := &fakeGitHubClient{
+		user: github.User{ID: 1, Login: "hikarilucky79"},
+		repos: []github.Repo{
+			{ID: 10, Name: "hikarilucky79", Description: "Profile README", HTMLURL: "https://github.com/hikarilucky79/hikarilucky79"},
+			{ID: 11, Name: "KaorCount", Language: "JavaScript", StargazersCount: 2, HTMLURL: "https://github.com/hikarilucky79/KaorCount"},
+			{ID: 12, Name: "keyra", Language: "Dart", StargazersCount: 1, HTMLURL: "https://github.com/hikarilucky79/keyra"},
+		},
+		langs: map[string]map[string]int64{
+			"KaorCount": {"JavaScript": 487986, "Python": 348360, "Shell": 4972},
+			"keyra":     {"Dart": 193423, "Rust": 158545, "C": 1939},
+		},
+	}
+	svc := NewService("hikarilucky79", gh, store.NewMemory(nil), 5*time.Minute, func() time.Time { return now }, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	list, err := svc.ListProjects(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected ListProjects error: %v", err)
+	}
+	if len(list.Projects) != 2 {
+		t.Fatalf("expected profile repo filtered out leaving 2 projects, got %d (%+v)", len(list.Projects), list.Projects)
+	}
+	if list.Projects[0].Name != "KaorCount" || len(list.Projects[0].Languages) != 2 || list.Projects[0].Languages[0] != "JavaScript" || list.Projects[0].Languages[1] != "Python" {
+		t.Fatalf("unexpected KaorCount languages: %+v", list.Projects[0].Languages)
+	}
+	if list.Projects[1].Name != "keyra" || len(list.Projects[1].Languages) != 2 || list.Projects[1].Languages[0] != "Dart" || list.Projects[1].Languages[1] != "Rust" {
+		t.Fatalf("unexpected keyra languages: %+v", list.Projects[1].Languages)
+	}
+
+	if _, err := svc.GetProject(context.Background(), "hikarilucky79"); !errors.Is(err, github.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound for filtered profile repo, got %v", err)
+	}
+
+	stats, err := svc.GetStats(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected GetStats error: %v", err)
+	}
+	if stats.TotalProjects != 2 || stats.TotalStars != 3 || len(stats.Languages) != 4 {
+		t.Fatalf("unexpected stats after filtering & multi-lang enrichment: %+v", stats)
+	}
+}

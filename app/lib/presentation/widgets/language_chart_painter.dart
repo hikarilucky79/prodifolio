@@ -90,7 +90,7 @@ class LanguageBreakdownChart extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${languages[i].count} repos · ${languages[i].percentage.toStringAsFixed(1)}%',
+                  '${languages[i].count} ${languages[i].count == 1 ? 'repo' : 'repos'} · ${languages[i].percentage.toStringAsFixed(1)}%',
                   style: context.monoStyle(size: 11, color: folio.inkMuted),
                 ),
               ],
