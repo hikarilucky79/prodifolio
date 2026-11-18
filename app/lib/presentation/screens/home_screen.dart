@@ -470,7 +470,7 @@ class _CatalogPreviewRow extends StatelessWidget {
           child: Row(
             children: [
               SizedBox(
-                width: 56,
+                width: 42,
                 child: Text(
                   ordinal,
                   style: context.monoStyle(size: 11, color: folio.contrastMuted),
@@ -482,18 +482,18 @@ class _CatalogPreviewRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Archivo',
-                    fontSize: 15,
+                    fontSize: 14.5,
                     fontWeight: FontWeight.w600,
                     color: folio.contrastInk,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
                 metaLabel,
-                style: context.monoStyle(size: 11, color: folio.contrastAccent),
+                style: context.monoStyle(size: 10.5, color: folio.contrastAccent),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Icon(Icons.north_east, size: 15, color: folio.contrastInk),
             ],
           ),
