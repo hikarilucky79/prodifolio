@@ -1,16 +1,67 @@
-# prodifolio
+<div align="center">
 
-Portfólio pessoal de **Kauã Oliveira** (`@hikarilucky79`), atualizado automaticamente a partir dos repositórios públicos do GitHub, com backend em **Go 1.22+**, banco **Supabase (PostgreSQL em 3FN)** e app **Flutter Material 3** (Web + Mobile).
+# Prodifolio
 
-- **Ao vivo:** [dev-hikari.vercel.app](https://dev-hikari.vercel.app)
-- **Currículo (PDF):** [dev-hikari.vercel.app/curriculo.pdf](https://dev-hikari.vercel.app/curriculo.pdf)
-- **LinkedIn:** [linkedin.com/in/kauã-oliveira-43b07b268](https://www.linkedin.com/in/kau%C3%A3-oliveira-43b07b268/)
+[![CI](https://github.com/hikarilucky79/prodifolio/actions/workflows/ci.yml/badge.svg)](https://github.com/hikarilucky79/prodifolio/actions/workflows/ci.yml)
+![Go](https://img.shields.io/badge/Go-1.22%2B-0D0D0E?style=flat-square&logo=go&logoColor=00ADD8)
+![Flutter](https://img.shields.io/badge/Flutter-Material_3-0D0D0E?style=flat-square&logo=flutter&logoColor=02569B)
+![Supabase](https://img.shields.io/badge/PostgreSQL-Supabase_3FN%2BRLS-0D0D0E?style=flat-square&logo=supabase&logoColor=3ECF8E)
+[![Ao vivo](https://img.shields.io/badge/Ao_vivo-dev--hikari.vercel.app-C86D51?style=flat-square&logo=vercel&logoColor=white)](https://dev-hikari.vercel.app)
 
-## Estrutura do monorepo
+[Portfólio ao vivo](https://dev-hikari.vercel.app) · [Currículo (PDF)](https://dev-hikari.vercel.app/curriculo.pdf) · [API Health](https://prodifolio-api.vercel.app/health) · [LinkedIn](https://www.linkedin.com/in/kau%C3%A3-oliveira-43b07b268/)
+
+</div>
+
+---
+
+## O que é
+
+**Prodifolio** é o portfólio profissional dinâmico de **Kauã Oliveira** (`@hikarilucky79`): uma API REST em **Go 1.22+** sincroniza automaticamente os repositórios e estatísticas do GitHub, persiste snapshots e mensagens de contato no **Supabase (PostgreSQL em 3FN com RLS)** e alimenta um aplicativo multiplataforma em **Flutter Material 3** (Web e Mobile) publicado em produção na Vercel.
+
+---
+
+## Prévia da Interface
+
+| Tela inicial (`https://dev-hikari.vercel.app`) | Catálogo de Projetos sincronizado |
+|---|---|
+| ![Tela inicial do Prodifolio](./docs/screenshots/home.png) | ![Catálogo de Projetos do Prodifolio](./docs/screenshots/projects.png) |
+
+---
+
+## Principais Funcionalidades
+
+- **Sincronização dinâmica com o GitHub:** coleta perfil, repositórios públicos e distribuição real de bytes por linguagem, filtrando o repositório de perfil (`hikarilucky79`), destacando multi-linguagens (`>= 15%` dos bytes) e resolvendo descrições legadas ou ausentes.
+- **Catálogo pesquisável e ficha técnica:** busca textual instantânea, filtros por linguagem (`Dart`, `Go`, `JavaScript`, `Python`, `Rust`) e cartão de detalhes para cada projeto.
+- **Estatísticas e trajetória:** cálculo de uso das linguagens com gráfico nativo desenhado em `CustomPainter`, além de linha do tempo com a arquitetura do projeto e a formação técnica no CEEP Curitiba (2024–2026).
+- **Contato persistido e protegido:** formulário com validação de campos, rate limiting por IP e gravação normalizada em tabelas separadas no Supabase.
+- **Tema editorial escuro/claro e currículo integrado:** alternância instantânea entre tema escuro e *Papel Osso* em Material 3 e acesso direto ao currículo ATS em PDF (`/curriculo.pdf`).
+
+---
+
+## Arquitetura e Tecnologias
+
+```text
+Flutter (Web & Mobile · Riverpod · CustomPainter)
+        │
+        ▼  HTTPS / JSON (CORS estrito em produção)
+Backend API em Go 1.22+ (net/http · slog · cache TTL · singleflight · rate limit)
+        ├── GitHub REST API (sincronização + proteção contra cota)
+        └── Supabase PostgreSQL 3FN + RLS (snapshots de projetos e contato)
+```
+
+| Camada | Tecnologias | Responsabilidade |
+|---|---|---|
+| **Frontend** | Flutter, Dart, Riverpod, `CustomPainter`, Material 3 | Interface responsiva (Web + Android), cache local de estado e tema escuro/claro |
+| **Backend** | Go 1.22+ (`net/http`, `slog`), `singleflight`, TTL Cache | Orquestração GitHub + Supabase, validação, rate limit por IP e cabeçalhos de segurança |
+| **Banco de Dados** | Supabase (PostgreSQL), SQL em 3FN, RLS | Persistência normalizada de perfil, repositórios, linguagens e contatos |
+| **Infraestrutura** | Vercel, Dockerfile multi-stage, GitHub Actions | Hospedagem serverless (frontend + API), CSP estrito com CanvasKit local e CI contínuo |
+
+### Estrutura do monorepo
 
 ```text
 prodifolio/
 ├── .github/workflows/ci.yml
+├── docs/screenshots/          # Capturas reais em produção
 ├── supabase/migrations/001_init_3nf.sql
 ├── backend/
 │   ├── cmd/server/main.go
@@ -38,11 +89,9 @@ prodifolio/
 
 **Justificativa do Riverpod:** Riverpod garante injeção de dependências com segurança em tempo de compilação e override direto do repositório nos testes sem `BuildContext`, evitando boilerplate de eventos/estados do Bloc para uma UI orientada a chamadas assíncronas.
 
----
+### Banco de dados (Supabase · 3FN)
 
-## Banco de dados (Supabase · 3FN)
-
-O arquivo [supabase/migrations/001_init_3nf.sql](supabase/migrations/001_init_3nf.sql) cria as tabelas normalizadas até a **Terceira Forma Normal (3FN)**:
+O arquivo [supabase/migrations/001_init_3nf.sql](./supabase/migrations/001_init_3nf.sql) cria as tabelas normalizadas até a **Terceira Forma Normal (3FN)**:
 
 - **1FN:** Todos os campos são atômicos; grupos repetidos de linguagens por repositório são separados em `repository_languages`.
 - **2FN:** Na única tabela com chave composta (`repository_languages(repository_id, language_id)`), `bytes_count` depende da chave inteira.
@@ -52,11 +101,22 @@ O arquivo [supabase/migrations/001_init_3nf.sql](supabase/migrations/001_init_3n
   - `contact_senders` separa identidade (`email`, `name`) de `contact_messages` (cada envio aponta para `sender_id`).
 - Todas as tabelas possuem **Row Level Security (RLS)** habilitado por padrão para bloquear acesso direto anônimo via PostgREST.
 
-### Aplicando a migração no Supabase
+#### Aplicando a migração no Supabase
 
 1. Crie um projeto no [Supabase](https://supabase.com).
 2. No **SQL Editor**, execute o conteúdo de `supabase/migrations/001_init_3nf.sql`.
 3. Copie a connection string PostgreSQL (Session Pooler ou Direct Connection) em **Connect -> Connection String** e configure `SUPABASE_DB_URL`.
+
+---
+
+## Boas Práticas de Engenharia
+
+- **Testes automatizados em Go e Flutter:**
+  - **Backend (6 suítes de testes em Go):** [`cache_test.go`](./backend/internal/cache/cache_test.go), [`config_test.go`](./backend/internal/config/config_test.go), [`handler_test.go`](./backend/internal/httpapi/handler_test.go), [`service_test.go`](./backend/internal/portfolio/service_test.go), [`limiter_test.go`](./backend/internal/ratelimit/limiter_test.go) e [`supabase_rest_test.go`](./backend/internal/store/supabase_rest_test.go), executadas com detector de race (`go vet ./... && go test -race -v ./...`).
+  - **App Flutter:** [`portfolio_repository_test.dart`](./app/test/portfolio_repository_test.dart) e [`widget_test.dart`](./app/test/widget_test.dart) executados junto à análise estática (`flutter analyze && flutter test`).
+- **CI contínuo no GitHub Actions:** [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) valida os jobs `Backend (Go)` e `App (Flutter)` a cada push e pull request para `main`.
+- **Variáveis de ambiente e segurança:** template versionado em [`backend/.env.example`](./backend/.env.example) (nenhum segredo commitado), configuração em tempo de build no app via `--dart-define`, cabeçalhos CSP/CORS estritos em [`app/vercel.json`](./app/vercel.json) (CanvasKit self-hosted via `canvasKitBaseUrl: 'canvaskit/'`) e **Row Level Security (RLS)** ativo por padrão no banco.
+- **Containers, Clean Architecture e versionamento:** [`backend/Dockerfile`](./backend/Dockerfile) multi-stage, separação em camadas (`core`, `data`, `domain`, `presentation` no Flutter e `internal/*` no Go) e histórico mantido com commits semânticos (`feat:`, `fix:`, `docs:`).
 
 ---
 
@@ -89,7 +149,8 @@ Testes do backend:
 
 ```bash
 cd backend
-go test -v ./...
+go vet ./...
+go test -race -v ./...
 ```
 
 ### 2. App Flutter (Web e Mobile)
@@ -123,7 +184,7 @@ flutter test
 
 ### Banco de Dados (Supabase)
 
-O projeto Supabase `prodifolio` (ref `kehvigrupngftwqhfnmv`, regiao `sa-east-1`) ja esta provisionado com o schema em 3FN aplicado ([supabase/migrations/001_init_3nf.sql](supabase/migrations/001_init_3nf.sql)).
+O projeto Supabase `prodifolio` (ref `kehvigrupngftwqhfnmv`, regiao `sa-east-1`) ja esta provisionado com o schema em 3FN aplicado ([supabase/migrations/001_init_3nf.sql](./supabase/migrations/001_init_3nf.sql)).
 
 Copie a string de conexao Postgres (Transaction pooler) em **Supabase Dashboard -> prodifolio -> Connect** e use-a na variavel `SUPABASE_DB_URL` do backend.
 
