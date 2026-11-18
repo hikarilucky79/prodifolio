@@ -272,3 +272,44 @@ func TestServiceFiltersProfileRepoAndEnrichesSignificantLanguages(t *testing.T) 
 		t.Fatalf("unexpected stats after filtering & multi-lang enrichment: %+v", stats)
 	}
 }
+
+func TestResolveProjectDescriptionFallbackAndOverride(t *testing.T) {
+	now := time.Date(2026, 11, 18, 12, 0, 0, 0, time.UTC)
+	gh := &fakeGitHubClient{
+		user: github.User{ID: 1, Login: "hikarilucky79"},
+		repos: []github.Repo{
+			{ID: 1, Name: "KaorCount", Description: "", Language: "JavaScript", HTMLURL: "https://github.com/hikarilucky79/KaorCount"},
+			{ID: 2, Name: "keyra", Description: "Mobile app built with Dart/Flutter — modern UI and interactive features", Language: "Dart", HTMLURL: "https://github.com/hikarilucky79/keyra"},
+		},
+	}
+	svc := NewService("hikarilucky79", gh, store.NewMemory(nil), 5*time.Minute, func() time.Time { return now }, slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+	list, err := svc.ListProjects(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected ListProjects error: %v", err)
+	}
+	wantKaor := "Plataforma nutricional da Keenko (Projeto Integrador CEEP) — API Python/FastAPI + MySQL 8, app React Native/Expo e Docker."
+	wantKeyra := "Engine de áudio de digitação desktop para Linux — daemon em Rust + interface nativa em Flutter Desktop via Unix Domain Sockets (IPC)."
+	if list.Projects[0].Description != wantKaor {
+		t.Fatalf("expected KaorCount fallback description, got %q", list.Projects[0].Description)
+	}
+	if list.Projects[1].Description != wantKeyra {
+		t.Fatalf("expected keyra fallback description, got %q", list.Projects[1].Description)
+	}
+
+	detail, err := svc.GetProject(context.Background(), "keyra")
+	if err != nil {
+		t.Fatalf("unexpected GetProject error: %v", err)
+	}
+	if detail.Description != wantKeyra {
+		t.Fatalf("expected GetProject(keyra) fallback description, got %q", detail.Description)
+	}
+
+	custom := "Custom GitHub description"
+	if got := resolveProjectDescription("KaorCount", custom); got != custom {
+		t.Fatalf("expected custom description to override fallback, got %q", got)
+	}
+	if got := resolveProjectDescription("keyra", custom); got != custom {
+		t.Fatalf("expected custom description to override fallback, got %q", got)
+	}
+}

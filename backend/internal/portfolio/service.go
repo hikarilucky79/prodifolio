@@ -161,7 +161,7 @@ func (s *Service) ListProjects(ctx context.Context) (ProjectsResponse, error) {
 		langs := significantLanguages(data.langBytes[repo.ID], repo.Language)
 		items = append(items, ProjectSummary{
 			Name:        repo.Name,
-			Description: repo.Description,
+			Description: resolveProjectDescription(repo.Name, repo.Description),
 			Languages:   langs,
 			Stars:       repo.StargazersCount,
 			LastCommit:  repo.PushedAt,
@@ -280,7 +280,7 @@ func (s *Service) GetProject(ctx context.Context, name string) (ProjectDetail, e
 
 		detail := ProjectDetail{
 			Name:              repo.Name,
-			Description:       repo.Description,
+			Description:       resolveProjectDescription(repo.Name, repo.Description),
 			Languages:         langs,
 			LanguageBytes:     langBytes,
 			Stars:             repo.StargazersCount,
@@ -631,6 +631,21 @@ func sortLanguagesByBytes(langBytes map[string]int64, primary string) []string {
 		out = append(out, p.name)
 	}
 	return out
+}
+
+func resolveProjectDescription(repoName, raw string) string {
+	trimmed := strings.TrimSpace(raw)
+	switch strings.ToLower(strings.TrimSpace(repoName)) {
+	case "kaorcount":
+		if trimmed == "" {
+			return "Plataforma nutricional da Keenko (Projeto Integrador CEEP) — API Python/FastAPI + MySQL 8, app React Native/Expo e Docker."
+		}
+	case "keyra":
+		if trimmed == "" || strings.EqualFold(trimmed, "Mobile app built with Dart/Flutter — modern UI and interactive features") {
+			return "Engine de áudio de digitação desktop para Linux — daemon em Rust + interface nativa em Flutter Desktop via Unix Domain Sockets (IPC)."
+		}
+	}
+	return trimmed
 }
 
 func firstLine(s string) string {
