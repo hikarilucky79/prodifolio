@@ -37,6 +37,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
           stars: (map['stars'] as num?)?.toInt() ?? 0,
           lastCommit: _tryParseDate(map['last_commit']),
           url: map['url']?.toString() ?? '',
+          previewUrl: map['preview_url']?.toString(),
         );
       }).toList(growable: false),
     );
@@ -64,6 +65,7 @@ class PortfolioRepositoryImpl implements PortfolioRepository {
       lastCommitSha: json['last_commit_sha']?.toString() ?? '',
       url: json['url']?.toString() ?? '',
       homepage: json['homepage']?.toString() ?? '',
+      previewUrl: json['preview_url']?.toString(),
     );
   }
 

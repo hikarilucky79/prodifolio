@@ -129,5 +129,20 @@ void main() {
         throwsA(isA<ApiException>().having((e) => e.code, 'code', 'MISSING_CONFIG')),
       );
     });
+
+    test('resolves GitHub OpenGraph preview URL and respects explicit override', () {
+      expect(
+        resolveProjectPreviewUrl(null, 'https://github.com/hikarilucky79/prodifolio'),
+        'https://opengraph.githubassets.com/1/hikarilucky79/prodifolio',
+      );
+      expect(
+        resolveProjectPreviewUrl(
+          'https://cdn.example.com/custom.png',
+          'https://github.com/hikarilucky79/prodifolio',
+        ),
+        'https://cdn.example.com/custom.png',
+      );
+      expect(resolveProjectPreviewUrl(null, 'https://example.com/other'), isNull);
+    });
   });
 }

@@ -16,6 +16,19 @@ class OwnerProfile {
   final String blogUrl;
 }
 
+String? resolveProjectPreviewUrl(String? explicitUrl, String repoUrl) {
+  final trimmed = explicitUrl?.trim() ?? '';
+  if (trimmed.isNotEmpty) return trimmed;
+  final uri = Uri.tryParse(repoUrl.trim());
+  if (uri == null || uri.host != 'github.com' || uri.pathSegments.length < 2) {
+    return null;
+  }
+  final owner = uri.pathSegments[0];
+  final repo = uri.pathSegments[1];
+  if (owner.isEmpty || repo.isEmpty) return null;
+  return 'https://opengraph.githubassets.com/1/$owner/$repo';
+}
+
 class Project {
   const Project({
     required this.name,
@@ -24,6 +37,7 @@ class Project {
     required this.stars,
     required this.lastCommit,
     required this.url,
+    this.previewUrl,
   });
 
   final String name;
@@ -32,6 +46,9 @@ class Project {
   final int stars;
   final DateTime? lastCommit;
   final String url;
+  final String? previewUrl;
+
+  String? get resolvedPreviewUrl => resolveProjectPreviewUrl(previewUrl, url);
 }
 
 class ProjectsFeed {
@@ -58,6 +75,7 @@ class ProjectDetail {
     required this.lastCommitSha,
     required this.url,
     required this.homepage,
+    this.previewUrl,
   });
 
   final String name;
@@ -72,6 +90,9 @@ class ProjectDetail {
   final String lastCommitSha;
   final String url;
   final String homepage;
+  final String? previewUrl;
+
+  String? get resolvedPreviewUrl => resolveProjectPreviewUrl(previewUrl, url);
 }
 
 class LanguageStat {
