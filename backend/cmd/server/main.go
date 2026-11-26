@@ -32,10 +32,10 @@ func main() {
 
 	var st store.Store
 	switch {
-	case cfg.SupabaseDBURL != "":
-		pgStore, err := store.NewPostgres(ctx, cfg.SupabaseDBURL)
+	case cfg.DBURL != "":
+		pgStore, err := store.NewPostgres(ctx, cfg.DBURL)
 		if err != nil {
-			logger.Error("failed to connect to supabase postgres", "error", err)
+			logger.Error("failed to connect to database", "error", err)
 			os.Exit(1)
 		}
 		st = pgStore
@@ -47,7 +47,7 @@ func main() {
 		}
 		st = restStore
 	default:
-		logger.Warn("supabase storage is not configured; using ephemeral in-memory store")
+		logger.Warn("database storage is not configured; using ephemeral in-memory store")
 		st = store.NewMemory(nil)
 	}
 	defer func() {

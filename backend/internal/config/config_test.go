@@ -34,6 +34,7 @@ func TestLoadSecurityDefaults(t *testing.T) {
 }
 
 func TestLoadSupabaseRESTConfig(t *testing.T) {
+	t.Setenv("TIDB_DB_URL", "")
 	t.Setenv("SUPABASE_DB_URL", "")
 	t.Setenv("DATABASE_URL", "")
 	t.Setenv("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -61,5 +62,19 @@ func TestLoadSupabaseRESTConfig(t *testing.T) {
 	}
 	if cfg.SupabaseSecretKey != "sb_secret_test" {
 		t.Fatalf("unexpected SupabaseSecretKey: %q", cfg.SupabaseSecretKey)
+	}
+}
+
+func TestLoadTiDBConfigPrecedence(t *testing.T) {
+	t.Setenv("TIDB_DB_URL", "postgresql://user:pass@gateway01.us-east-1.prod.aws.pg.tidbcloud.com:5432/prodifolio?sslmode=require")
+	t.Setenv("DATABASE_URL", "postgresql://fallback/db")
+	t.Setenv("SUPABASE_DB_URL", "postgresql://legacy/db")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.DBURL != "postgresql://user:pass@gateway01.us-east-1.prod.aws.pg.tidbcloud.com:5432/prodifolio?sslmode=require" {
+		t.Fatalf("expected TIDB_DB_URL to take precedence, got %q", cfg.DBURL)
 	}
 }
