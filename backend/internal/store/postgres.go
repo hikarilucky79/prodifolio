@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
+	_ "embed"
 	"fmt"
 	"math"
 	"os"
@@ -14,8 +16,12 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 )
 
+//go:embed schema.sql
+var schemaSQL string
+
 type PostgresStore struct {
 	db              *sql.DB
+	mode            string
 	lastCleanupUnix atomic.Int64
 }
 
@@ -24,9 +30,17 @@ func NewPostgres(ctx context.Context, dbURL string) (*PostgresStore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse postgres config: %w", err)
 	}
+	isTiDB := strings.Contains(strings.ToLower(pgCfg.Host), "tidb")
+	if isTiDB && pgCfg.TLSConfig == nil {
+		// TiDB Cloud PostgreSQL requires TLS even when sslmode is omitted from the DSN.
+		pgCfg.TLSConfig = &tls.Config{
+			ServerName: pgCfg.Host,
+			MinVersion: tls.VersionTLS12,
+		}
+	}
 	isVercel := strings.TrimSpace(os.Getenv("VERCEL")) == "1"
 	if pgCfg.Port == 6543 || isVercel {
-		// Supavisor transaction pooling and ephemeral lambdas avoid prepared-statement affinity issues.
+		// Poolers and ephemeral lambdas avoid prepared-statement affinity issues.
 		pgCfg.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
 	}
 
@@ -45,9 +59,21 @@ func NewPostgres(ctx context.Context, dbURL string) (*PostgresStore, error) {
 	defer cancel()
 	if err := db.PingContext(pingCtx); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("ping supabase postgres: %w", err)
+		return nil, fmt.Errorf("ping database: %w", err)
 	}
-	return &PostgresStore{db: db}, nil
+
+	schemaCtx, schemaCancel := context.WithTimeout(ctx, 15*time.Second)
+	defer schemaCancel()
+	if _, err := db.ExecContext(schemaCtx, schemaSQL); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("ensure database schema: %w", err)
+	}
+
+	mode := "postgres"
+	if isTiDB {
+		mode = "tidb"
+	}
+	return &PostgresStore{db: db, mode: mode}, nil
 }
 
 func (p *PostgresStore) SaveContact(ctx context.Context, input ContactInput) (ContactReceipt, error) {
@@ -298,5 +324,8 @@ func (p *PostgresStore) Close() error {
 }
 
 func (p *PostgresStore) Mode() string {
-	return "supabase"
+	if p.mode != "" {
+		return p.mode
+	}
+	return "postgres"
 }
