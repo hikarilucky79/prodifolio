@@ -89,8 +89,8 @@ class _AnimatedTimelineState extends State<_AnimatedTimeline>
               ),
               const _PracticeNote(
                 index: 'B',
-                title: 'Banco Supabase em 3FN',
-                body: 'Modelagem normalizada, integridade transacional e Row Level Security.',
+                title: 'Banco TiDB Cloud em 3FN',
+                body: 'Modelagem normalizada, integridade transacional e protocolo PostgreSQL.',
               ),
               const _PracticeNote(
                 index: 'C',

@@ -92,7 +92,7 @@ func (h *handler) handleHealth(w http.ResponseWriter, r *http.Request) {
 	if h.opts.RequireDBForContact && dbMode == "memory" {
 		status = "degraded"
 		code = http.StatusServiceUnavailable
-		warning = "supabase storage is not configured"
+		warning = "database storage is not configured"
 	}
 
 	payload := map[string]any{

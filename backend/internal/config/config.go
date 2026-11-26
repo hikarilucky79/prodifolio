@@ -19,7 +19,7 @@ type Config struct {
 	ContactRateLimit   int
 	ContactRateWindow  time.Duration
 	TrustProxy         bool
-	SupabaseDBURL      string
+	DBURL              string
 	SupabaseURL        string
 	SupabaseSecretKey  string
 }
@@ -42,10 +42,7 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
-	dbURL := strings.TrimSpace(os.Getenv("SUPABASE_DB_URL"))
-	if dbURL == "" {
-		dbURL = strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	}
+	dbURL := firstNonEmptyEnv("TIDB_DB_URL", "DATABASE_URL", "SUPABASE_DB_URL")
 
 	supabaseURL := strings.TrimRight(strings.TrimSpace(os.Getenv("SUPABASE_URL")), "/")
 	supabaseSecretKey := strings.TrimSpace(os.Getenv("SUPABASE_SECRET_KEY"))
@@ -74,10 +71,19 @@ func Load() (Config, error) {
 		ContactRateLimit:   rateLimit,
 		ContactRateWindow:  rateWindow,
 		TrustProxy:         trustProxy,
-		SupabaseDBURL:      dbURL,
+		DBURL:              dbURL,
 		SupabaseURL:        supabaseURL,
 		SupabaseSecretKey:  supabaseSecretKey,
 	}, nil
+}
+
+func firstNonEmptyEnv(keys ...string) string {
+	for _, k := range keys {
+		if v := strings.TrimSpace(os.Getenv(k)); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 func envOr(key, fallback string) string {

@@ -1,6 +1,6 @@
 # prodifolio · Kauã Oliveira (@hikarilucky79)
 
-> Portfólio pessoal de Kauã Oliveira (@hikarilucky79), construído com backend REST em Go 1.22+ conectado ao Supabase PostgreSQL e interface em Flutter Web.
+> Portfólio pessoal de Kauã Oliveira (@hikarilucky79), construído com backend REST em Go 1.22+ conectado ao TiDB Cloud (PostgreSQL) e interface em Flutter Web.
 
 ## When to use
 
