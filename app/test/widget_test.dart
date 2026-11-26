@@ -38,7 +38,7 @@ class FakePortfolioRepository implements PortfolioRepository {
         ),
         Project(
           name: 'prodifolio-api',
-          description: 'Backend em Go com Supabase',
+          description: 'Backend em Go com TiDB Cloud',
           languages: const ['Go'],
           stars: 8,
           lastCommit: DateTime(2026, 11, 12),

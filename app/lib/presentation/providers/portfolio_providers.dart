@@ -93,7 +93,7 @@ final aboutTimelineProvider = FutureProvider<List<TimelineMilestone>>((ref) asyn
       subtitle: 'Arquitetura limpa e modelagem relacional',
       highlights: [
         'Cache TTL em memória, rate limiting por IP e logs estruturados em Go',
-        'Banco PostgreSQL/Supabase em 3FN com RLS e APIs FastAPI + MySQL 8',
+        'Banco TiDB Cloud (PostgreSQL) em 3FN e APIs FastAPI + MySQL 8',
       ],
     ),
     const TimelineMilestone(
