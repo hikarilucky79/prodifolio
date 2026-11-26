@@ -7,6 +7,7 @@ import '../providers/portfolio_providers.dart';
 import '../widgets/async_state_view.dart';
 import '../widgets/external_link.dart';
 import '../widgets/project_lightbox_sheet.dart';
+import '../widgets/project_preview_image.dart';
 
 class ProjectsScreen extends ConsumerStatefulWidget {
   const ProjectsScreen({super.key});
@@ -318,6 +319,14 @@ class _CatalogProjectRow extends StatelessWidget {
       ],
     );
 
+    final previewThumb = ProjectPreviewImage(
+      projectName: project.name,
+      previewUrl: project.resolvedPreviewUrl,
+      primaryLanguage:
+          project.languages.isNotEmpty ? project.languages.first : null,
+      compact: true,
+    );
+
     return InkWell(
       onTap: onOpenDetail,
       child: Padding(
@@ -346,6 +355,8 @@ class _CatalogProjectRow extends StatelessWidget {
                       ],
                     ),
                   ),
+                  SizedBox(width: 148, height: 92, child: previewThumb),
+                  const SizedBox(width: 20),
                   Expanded(child: detailsColumn),
                   const SizedBox(width: 24),
                   Column(
@@ -371,7 +382,9 @@ class _CatalogProjectRow extends StatelessWidget {
                       starReadout,
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
+                  AspectRatio(aspectRatio: 16 / 9, child: previewThumb),
+                  const SizedBox(height: 14),
                   detailsColumn,
                   const SizedBox(height: 12),
                   Align(alignment: Alignment.centerRight, child: actionsRow),
