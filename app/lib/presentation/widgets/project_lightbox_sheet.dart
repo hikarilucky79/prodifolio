@@ -6,6 +6,7 @@ import '../../domain/entities/portfolio_entities.dart';
 import '../providers/portfolio_providers.dart';
 import 'async_state_view.dart';
 import 'external_link.dart';
+import 'project_preview_image.dart';
 
 Future<void> showProjectLightbox(BuildContext context, String projectName) {
   return showDialog<void>(
@@ -119,6 +120,16 @@ class _LightboxBody extends ConsumerWidget {
               ? detail.description
               : 'Sem descrição cadastrada no GitHub.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: folio.inkMuted),
+        ),
+        const SizedBox(height: 20),
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: ProjectPreviewImage(
+            projectName: detail.name,
+            previewUrl: detail.resolvedPreviewUrl,
+            primaryLanguage:
+                detail.languages.isNotEmpty ? detail.languages.first : null,
+          ),
         ),
         const SizedBox(height: 24),
         Container(
