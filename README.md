@@ -5,7 +5,7 @@
 [![CI](https://github.com/hikarilucky79/prodifolio/actions/workflows/ci.yml/badge.svg)](https://github.com/hikarilucky79/prodifolio/actions/workflows/ci.yml)
 ![Go](https://img.shields.io/badge/Go-1.22%2B-0D0D0E?style=flat-square&logo=go&logoColor=00ADD8)
 ![Flutter](https://img.shields.io/badge/Flutter-Material_3-0D0D0E?style=flat-square&logo=flutter&logoColor=02569B)
-![Supabase](https://img.shields.io/badge/PostgreSQL-Supabase_3FN%2BRLS-0D0D0E?style=flat-square&logo=supabase&logoColor=3ECF8E)
+![TiDB Cloud](https://img.shields.io/badge/PostgreSQL-TiDB_Cloud_3FN-0D0D0E?style=flat-square&logo=postgresql&logoColor=4169E1)
 [![Ao vivo](https://img.shields.io/badge/Ao_vivo-dev--hikari.vercel.app-C86D51?style=flat-square&logo=vercel&logoColor=white)](https://dev-hikari.vercel.app)
 
 [Portfólio ao vivo](https://dev-hikari.vercel.app) · [Currículo (PDF)](https://dev-hikari.vercel.app/curriculo.pdf) · [API Health](https://prodifolio-api.vercel.app/health) · [LinkedIn](https://www.linkedin.com/in/kau%C3%A3-oliveira-43b07b268/)
@@ -16,7 +16,7 @@
 
 ## O que é
 
-**Prodifolio** é o portfólio profissional dinâmico de **Kauã Oliveira** (`@hikarilucky79`): uma API REST em **Go 1.22+** sincroniza automaticamente os repositórios e estatísticas do GitHub, persiste snapshots e mensagens de contato no **Supabase (PostgreSQL em 3FN com RLS)** e alimenta um aplicativo multiplataforma em **Flutter Material 3** (Web e Mobile) publicado em produção na Vercel.
+**Prodifolio** é o portfólio profissional dinâmico de **Kauã Oliveira** (`@hikarilucky79`): uma API REST em **Go 1.22+** sincroniza automaticamente os repositórios e estatísticas do GitHub, persiste snapshots e mensagens de contato no **TiDB Cloud (PostgreSQL em 3FN)** e alimenta um aplicativo multiplataforma em **Flutter Material 3** (Web e Mobile) publicado em produção na Vercel.
 
 ---
 
@@ -33,7 +33,7 @@
 - **Sincronização dinâmica com o GitHub:** coleta perfil, repositórios públicos e distribuição real de bytes por linguagem, filtrando o repositório de perfil (`hikarilucky79`), destacando multi-linguagens (`>= 15%` dos bytes) e resolvendo descrições legadas ou ausentes.
 - **Catálogo pesquisável e ficha técnica:** busca textual instantânea, filtros por linguagem (`Dart`, `Go`, `JavaScript`, `Python`, `Rust`) e cartão de detalhes para cada projeto.
 - **Estatísticas e trajetória:** cálculo de uso das linguagens com gráfico nativo desenhado em `CustomPainter`, além de linha do tempo com a arquitetura do projeto e a formação técnica no CEEP Curitiba (2024–2026).
-- **Contato persistido e protegido:** formulário com validação de campos, rate limiting por IP e gravação normalizada em tabelas separadas no Supabase.
+- **Contato persistido e protegido:** formulário com validação de campos, rate limiting por IP e gravação normalizada em tabelas separadas no TiDB Cloud.
 - **Tema editorial escuro/claro e currículo integrado:** alternância instantânea entre tema escuro e *Papel Osso* em Material 3 e acesso direto ao currículo ATS em PDF (`/curriculo.pdf`).
 
 ---
@@ -46,14 +46,14 @@ Flutter (Web & Mobile · Riverpod · CustomPainter)
         ▼  HTTPS / JSON (CORS estrito em produção)
 Backend API em Go 1.22+ (net/http · slog · cache TTL · singleflight · rate limit)
         ├── GitHub REST API (sincronização + proteção contra cota)
-        └── Supabase PostgreSQL 3FN + RLS (snapshots de projetos e contato)
+        └── TiDB Cloud PostgreSQL 3FN (snapshots de projetos, rate limit e contato)
 ```
 
 | Camada | Tecnologias | Responsabilidade |
 |---|---|---|
 | **Frontend** | Flutter, Dart, Riverpod, `CustomPainter`, Material 3 | Interface responsiva (Web + Android), cache local de estado e tema escuro/claro |
-| **Backend** | Go 1.22+ (`net/http`, `slog`), `singleflight`, TTL Cache | Orquestração GitHub + Supabase, validação, rate limit por IP e cabeçalhos de segurança |
-| **Banco de Dados** | Supabase (PostgreSQL), SQL em 3FN, RLS | Persistência normalizada de perfil, repositórios, linguagens e contatos |
+| **Backend** | Go 1.22+ (`net/http`, `slog`), `singleflight`, TTL Cache | Orquestração GitHub + TiDB Cloud, validação, rate limit por IP e cabeçalhos de segurança |
+| **Banco de Dados** | TiDB Cloud (PostgreSQL), SQL em 3FN | Persistência normalizada de perfil, repositórios, linguagens, rate limit e contatos |
 | **Infraestrutura** | Vercel, Dockerfile multi-stage, GitHub Actions | Hospedagem serverless (frontend + API), CSP estrito com CanvasKit local e CI contínuo |
 
 ### Estrutura do monorepo
@@ -62,7 +62,7 @@ Backend API em Go 1.22+ (net/http · slog · cache TTL · singleflight · rate l
 prodifolio/
 ├── .github/workflows/ci.yml
 ├── docs/screenshots/          # Capturas reais em produção
-├── supabase/migrations/001_init_3nf.sql
+├── db/migrations/001_tidb_init.sql
 ├── backend/
 │   ├── cmd/server/main.go
 │   ├── internal/
@@ -72,7 +72,7 @@ prodifolio/
 │   │   ├── httpapi/        # Rotas Go 1.22 net/http, CORS, slog e erros JSON
 │   │   ├── portfolio/      # Regras de projetos, estatísticas e validação de contato
 │   │   ├── ratelimit/      # Rate limit por IP com suporte opcional a proxy confiável
-│   │   └── store/          # Persistência Supabase Postgres 3FN + fallback em memória
+│   │   └── store/          # Persistência TiDB/Postgres 3FN + fallback em memória
 │   ├── Dockerfile
 │   ├── .env.example
 │   └── go.mod
@@ -89,9 +89,9 @@ prodifolio/
 
 **Justificativa do Riverpod:** Riverpod garante injeção de dependências com segurança em tempo de compilação e override direto do repositório nos testes sem `BuildContext`, evitando boilerplate de eventos/estados do Bloc para uma UI orientada a chamadas assíncronas.
 
-### Banco de dados (Supabase · 3FN)
+### Banco de dados (TiDB Cloud · 3FN)
 
-O arquivo [supabase/migrations/001_init_3nf.sql](./supabase/migrations/001_init_3nf.sql) cria as tabelas normalizadas até a **Terceira Forma Normal (3FN)**:
+O arquivo [db/migrations/001_tidb_init.sql](./db/migrations/001_tidb_init.sql) cria as tabelas normalizadas até a **Terceira Forma Normal (3FN)**:
 
 - **1FN:** Todos os campos são atômicos; grupos repetidos de linguagens por repositório são separados em `repository_languages`.
 - **2FN:** Na única tabela com chave composta (`repository_languages(repository_id, language_id)`), `bytes_count` depende da chave inteira.
@@ -99,13 +99,12 @@ O arquivo [supabase/migrations/001_init_3nf.sql](./supabase/migrations/001_init_
   - `owners` isola dados do perfil GitHub de `repositories`.
   - `languages` isola nomes de linguagens das tabelas de repositórios.
   - `contact_senders` separa identidade (`email`, `name`) de `contact_messages` (cada envio aponta para `sender_id`).
-- Todas as tabelas possuem **Row Level Security (RLS)** habilitado por padrão para bloquear acesso direto anônimo via PostgREST.
 
-#### Aplicando a migração no Supabase
+#### Aplicando a migração no TiDB Cloud
 
-1. Crie um projeto no [Supabase](https://supabase.com).
-2. No **SQL Editor**, execute o conteúdo de `supabase/migrations/001_init_3nf.sql`.
-3. Copie a connection string PostgreSQL (Session Pooler ou Direct Connection) em **Connect -> Connection String** e configure `SUPABASE_DB_URL`.
+1. Crie um cluster PostgreSQL-compatible no [TiDB Cloud](https://tidbcloud.com).
+2. No **SQL Editor** do TiDB Cloud (ou via `psql`), execute o conteúdo de `db/migrations/001_tidb_init.sql`.
+3. Copie a connection string PostgreSQL com `?sslmode=require` e configure `TIDB_DB_URL`.
 
 ---
 
@@ -127,7 +126,7 @@ O arquivo [supabase/migrations/001_init_3nf.sql](./supabase/migrations/001_init_
 ```bash
 cd backend
 cp .env.example .env
-# Preencha GITHUB_TOKEN (recomendado para evitar 60 req/h) e SUPABASE_DB_URL (opcional em dev)
+# Preencha GITHUB_TOKEN (recomendado para evitar 60 req/h) e TIDB_DB_URL (opcional em dev)
 go run ./cmd/server
 ```
 
@@ -143,7 +142,7 @@ Variáveis de ambiente principais:
 | `CONTACT_RATE_LIMIT` | `5` | Máximo de envios no `POST /contact` por janela |
 | `CONTACT_RATE_WINDOW` | `1m` | Janela do rate limit por IP |
 | `TRUST_PROXY` | `false` | Se `true`, lê `X-Forwarded-For` / `X-Real-IP` |
-| `SUPABASE_DB_URL` | _(vazio)_ | Connection string Postgres do Supabase (vazio usa memória em dev) |
+| `TIDB_DB_URL` | _(vazio)_ | Connection string PostgreSQL do TiDB Cloud (vazio usa memória em dev; aceita `DATABASE_URL` como fallback) |
 
 Testes do backend:
 
@@ -182,11 +181,11 @@ flutter test
 
 ## Deploy
 
-### Banco de Dados (Supabase)
+### Banco de Dados (TiDB Cloud)
 
-O projeto Supabase `prodifolio` (ref `kehvigrupngftwqhfnmv`, regiao `sa-east-1`) ja esta provisionado com o schema em 3FN aplicado ([supabase/migrations/001_init_3nf.sql](./supabase/migrations/001_init_3nf.sql)).
+Provisione o banco PostgreSQL-compatible no TiDB Cloud e execute [db/migrations/001_tidb_init.sql](./db/migrations/001_tidb_init.sql).
 
-Copie a string de conexao Postgres (Transaction pooler) em **Supabase Dashboard -> prodifolio -> Connect** e use-a na variavel `SUPABASE_DB_URL` do backend.
+Configure a string de conexão na variável `TIDB_DB_URL` (com `?sslmode=require`) do backend.
 
 ### Backend na Vercel (`backend/vercel.json`)
 
@@ -194,14 +193,14 @@ Copie a string de conexao Postgres (Transaction pooler) em **Supabase Dashboard 
 cd backend
 vercel login
 vercel --scope hikari-s-projects2 link --yes
-vercel --scope hikari-s-projects2 env add SUPABASE_DB_URL production
+vercel --scope hikari-s-projects2 env add TIDB_DB_URL production
 vercel --scope hikari-s-projects2 env add GITHUB_TOKEN production
 vercel --scope hikari-s-projects2 env add TRUST_PROXY production
 vercel --scope hikari-s-projects2 env add CORS_ALLOWED_ORIGINS production
 vercel --scope hikari-s-projects2 deploy --prod
 ```
 
-> Em ambiente serverless na Vercel, o cache em memoria e o rate limit por IP valem por instancia quente, enquanto o Supabase persiste snapshots e contatos entre invocacoes.
+> Em ambiente serverless na Vercel, o cache em memoria e o rate limit por IP valem por instancia quente, enquanto o TiDB Cloud persiste snapshots, rate limit e contatos entre invocacoes.
 
 ### Backend via Docker (Fly.io, Cloud Run, Render, Railway)
 
@@ -210,7 +209,7 @@ cd backend
 docker build -t prodifolio-api .
 docker run -p 8080:8080 \
   -e GITHUB_TOKEN="$GITHUB_TOKEN" \
-  -e SUPABASE_DB_URL="$SUPABASE_DB_URL" \
+  -e TIDB_DB_URL="$TIDB_DB_URL" \
   -e CORS_ALLOWED_ORIGINS="https://seu-dominio.com" \
   -e TRUST_PROXY=true \
   prodifolio-api
