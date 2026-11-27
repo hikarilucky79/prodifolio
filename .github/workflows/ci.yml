@@ -37,3 +37,43 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+
+  vercel-check:
+    name: Vercel Build & Artifact Check
+    needs: [backend, app]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: backend/go.sum
+      - name: Verify Go backend build for Vercel
+        working-directory: backend
+        run: |
+          test -f vercel.json
+          go build ./...
+      - name: Build Flutter Web bundle for Vercel
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build web --release \
+            --dart-define=API_BASE_URL=https://prodifolio-api.vercel.app \
+            --dart-define=RESUME_URL=https://dev-hikari.vercel.app/curriculo.pdf
+          cp vercel.json build/web/vercel.json
+          test -f build/web/index.html
+      - name: Deploy Flutter Web to Vercel (when VERCEL_TOKEN is set)
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        working-directory: app/build/web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npx --yes vercel@latest deploy --prod --yes --token="$VERCEL_TOKEN" --scope=hikari-s-projects2 --project=prodifolio
+          else
+            npx --yes vercel@latest deploy --yes --token="$VERCEL_TOKEN" --scope=hikari-s-projects2 --project=prodifolio
+          fi
