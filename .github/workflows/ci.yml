@@ -66,6 +66,20 @@ jobs:
             --dart-define=RESUME_URL=https://dev-hikari.vercel.app/curriculo.pdf
           cp vercel.json build/web/vercel.json
           test -f build/web/index.html
+      - name: Deploy Go API to Vercel (when VERCEL_TOKEN is set)
+        working-directory: backend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN not set; skipping API deploy."
+            exit 0
+          fi
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npx --yes vercel@latest deploy --prod --yes --token="$VERCEL_TOKEN" --scope=hikari-s-projects2 --project=prodifolio-api
+          else
+            npx --yes vercel@latest deploy --yes --token="$VERCEL_TOKEN" --scope=hikari-s-projects2 --project=prodifolio-api
+          fi
       - name: Deploy Flutter Web to Vercel (when VERCEL_TOKEN is set)
         working-directory: app/build/web
         env:
