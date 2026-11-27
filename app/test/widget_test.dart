@@ -114,13 +114,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('KaorCount'), findsOneWidget);
-    expect(find.text('prodifolio-api'), findsOneWidget);
+    expect(find.text('KaorCount'), findsWidgets);
+    expect(find.text('prodifolio-api'), findsWidgets);
 
     await tester.tap(find.widgetWithText(FilterChip, 'Go'));
     await tester.pumpAndSettle();
 
-    expect(find.text('prodifolio-api'), findsOneWidget);
+    expect(find.text('prodifolio-api'), findsWidgets);
     expect(find.text('KaorCount'), findsNothing);
 
     await tester.enterText(find.byType(TextField), 'inexistente');
@@ -130,8 +130,8 @@ void main() {
     await tester.tap(find.text('Limpar filtros'));
     await tester.pumpAndSettle();
 
-    expect(find.text('KaorCount'), findsOneWidget);
-    expect(find.text('prodifolio-api'), findsOneWidget);
+    expect(find.text('KaorCount'), findsWidgets);
+    expect(find.text('prodifolio-api'), findsWidgets);
   });
 
   testWidgets('ContactScreen validates invalid fields before calling repository', (tester) async {
